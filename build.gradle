@@ -1,0 +1,118 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
+}
+
+group = 'com.jahnavi'
+version = '0.0.1-SNAPSHOT'
+description = 'Contribution Service'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // ---------------- Spring Boot ----------------
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+    // ---------------- Swagger ----------------
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.10'
+
+    // ---------------- Database ----------------
+    runtimeOnly 'com.mysql:mysql-connector-j:9.0.0'
+
+    // ---------------- CSV / Excel ----------------
+    implementation 'org.apache.commons:commons-csv:1.10.0'
+    implementation 'com.opencsv:opencsv:5.11.2'
+
+    implementation 'org.apache.poi:poi:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+
+    // ---------------- PDF ----------------
+    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+    implementation 'com.openhtmltopdf:openhtmltopdf-svg-support:1.0.10'
+    implementation 'com.openhtmltopdf:openhtmltopdf-core:1.0.10'
+
+    // ---------------- File Handling ----------------
+    implementation 'commons-io:commons-io:2.15.1'
+    implementation 'commons-fileupload:commons-fileupload:1.5'
+
+    // ---------------- HTTP Client ----------------
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.4.4'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+    // ---------------- AWS BOM (Important) ----------------
+    implementation platform('software.amazon.awssdk:bom:2.25.20')
+
+    // ---------------- AWS SDK ----------------
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'software.amazon.awssdk:sqs'
+    implementation 'software.amazon.awssdk:secretsmanager'
+
+    // ---------------- Spring Cloud AWS ----------------
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs:3.1.1'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-secrets-manager:3.1.1'
+
+    // ---------------- Mail ----------------
+    implementation 'com.sun.mail:jakarta.mail:2.0.1'
+
+    // ---------------- JSON ----------------
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.google.code.gson:gson:2.11.0'
+    // ---------------- Security / JWT ----------------
+    implementation 'com.auth0:java-jwt:4.5.0'
+
+    // ---------------- Feign ----------------
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.2.1'
+
+    // ---------------- Retry ----------------
+    implementation 'org.springframework.retry:spring-retry:2.0.7'
+
+    // ---------------- Cache ----------------
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+
+    // ---------------- Utility ----------------
+    implementation 'org.jsoup:jsoup:1.17.2'
+    implementation 'org.apache.tika:tika-core:3.1.0'
+    implementation 'com.drewnoakes:metadata-extractor:2.19.0'
+    implementation 'net.lingala.zip4j:zip4j:2.11.5'
+
+    // ---------------- Model Mapper ----------------
+    implementation 'org.modelmapper:modelmapper:3.1.0'
+
+    // ---------------- MapStruct ----------------
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    // ---------------- Lombok ----------------
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    // ---------------- Testing ----------------
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mockito:mockito-core:5.14.1'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
