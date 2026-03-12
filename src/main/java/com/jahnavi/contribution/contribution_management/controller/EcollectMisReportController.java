@@ -1,7 +1,7 @@
 package com.jahnavi.contribution.contribution_management.controller;
 
-import com.vivriti.investron.common.response.ApiResponse;
-import com.vivriti.investron.common.utils.CoreUtil;
+import com.jahnavi.contribution.dto.ApiResponse;
+import com.jahnavi.contribution.util.CoreUtil;
 import com.jahnavi.contribution.contribution_management.service.impl.MisProcessingServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

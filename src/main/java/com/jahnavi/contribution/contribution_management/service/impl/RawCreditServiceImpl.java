@@ -7,7 +7,7 @@ import com.jahnavi.contribution.contribution_management.entity.RawCreditCombined
 import com.jahnavi.contribution.contribution_management.repository.MisUploadRepository;
 import com.jahnavi.contribution.contribution_management.repository.RawCreditRepository;
 import com.jahnavi.contribution.contribution_management.service.RawCreditService;
-import com.vivriti.investron.common.exception.CoreException;
+import com.jahnavi.contribution.exception.CoreException;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

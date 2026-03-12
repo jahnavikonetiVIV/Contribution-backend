@@ -2,7 +2,7 @@ package com.jahnavi.contribution.contribution_management.entity;
 
 import com.jahnavi.contribution.contribution_management.enums.Classification;
 import com.jahnavi.contribution.contribution_management.enums.ClassificationStatus;
-import com.vivriti.investron.common.entity.BaseEntity;
+import com.jahnavi.contribution.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

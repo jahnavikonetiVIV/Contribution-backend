@@ -3,7 +3,7 @@ package com.jahnavi.contribution.contribution_management.controller;
 import com.jahnavi.contribution.contribution_management.dto.InvestorDataDto;
 import com.jahnavi.contribution.contribution_management.entity.InvestorData;
 import com.jahnavi.contribution.contribution_management.repository.InvestorDataRepository;
-import com.vivriti.investron.common.response.ApiResponse;
+import com.jahnavi.contribution.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class InvestorDataController {
     @Operation(summary = "Update investor data")
     public ResponseEntity<ApiResponse> update(@PathVariable Long id, @RequestBody InvestorDataDto dto) {
         InvestorData entity = investorDataRepository.findById(id)
-                .orElseThrow(() -> new com.vivriti.investron.common.exception.CoreException(404, "Investor data not found"));
+                .orElseThrow(() -> new com.jahnavi.contribution.exception.CoreException(404, "Investor data not found"));
         entity.setInvestorName(dto.getInvestorName());
         entity.setVirtualAccountNumber(dto.getVirtualAccountNumber());
         entity.setBankAccountNumber(dto.getBankAccountNumber());

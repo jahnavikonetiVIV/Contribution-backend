@@ -9,10 +9,6 @@ import com.jahnavi.contribution.contribution_management.enums.ClassificationStat
 import com.jahnavi.contribution.contribution_management.repository.InvestorDataRepository;
 import com.jahnavi.contribution.contribution_management.repository.RawCreditCombinedRepository;
 import com.jahnavi.contribution.contribution_management.util.EmailTemplateLoader;
-import com.vivriti.investron.common.config.AppConfig;
-import com.vivriti.investron.common.dto.MailRequestDto;
-import com.vivriti.investron.common.feign.NotificationFeignClientHelper;
-import com.vivriti.investron.common.response.MailerApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

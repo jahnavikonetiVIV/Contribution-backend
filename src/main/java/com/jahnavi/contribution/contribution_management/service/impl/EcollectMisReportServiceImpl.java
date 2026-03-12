@@ -1,6 +1,6 @@
 package com.jahnavi.contribution.contribution_management.service.impl;
 
-import com.vivriti.investron.common.exception.CoreException;
+import com.jahnavi.contribution.exception.CoreException;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;

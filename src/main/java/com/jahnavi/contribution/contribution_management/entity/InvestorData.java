@@ -1,6 +1,6 @@
 package com.jahnavi.contribution.contribution_management.entity;
 
-import com.vivriti.investron.common.entity.BaseEntity;
+import com.jahnavi.contribution.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

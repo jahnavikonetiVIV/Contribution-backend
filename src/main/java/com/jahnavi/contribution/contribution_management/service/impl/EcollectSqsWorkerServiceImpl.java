@@ -2,7 +2,7 @@ package com.jahnavi.contribution.contribution_management.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jahnavi.contribution.contribution_management.dto.S3EventNotificationDto;
-import com.vivriti.investron.common.exception.CoreException;
+import com.jahnavi.contribution.exception.CoreException;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import io.awspring.cloud.sqs.annotation.SqsListenerAcknowledgementMode;
 import io.awspring.cloud.sqs.listener.acknowledgement.Acknowledgement;

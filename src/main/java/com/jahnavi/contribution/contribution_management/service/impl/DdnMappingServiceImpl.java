@@ -23,7 +23,7 @@ import com.jahnavi.contribution.contribution_management.repository.VirtualAccoun
 import com.jahnavi.contribution.contribution_management.repository.VirtualAccountTransactionRepository;
 import com.jahnavi.contribution.contribution_management.service.DdnDataService;
 import com.jahnavi.contribution.contribution_management.service.DdnMappingService;
-import com.vivriti.investron.common.exception.CoreException;
+import com.jahnavi.contribution.exception.CoreException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

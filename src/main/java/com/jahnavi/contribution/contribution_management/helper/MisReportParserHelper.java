@@ -1,7 +1,7 @@
 package com.jahnavi.contribution.contribution_management.helper;
 
 import com.jahnavi.contribution.contribution_management.dto.EcollectTransactionDto;
-import com.vivriti.investron.common.exception.CoreException;
+import com.jahnavi.contribution.exception.CoreException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;

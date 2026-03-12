@@ -1,8 +1,8 @@
 package com.jahnavi.contribution.contribution_management.controller;
 
-import com.vivriti.investron.common.auth.UserSessionUtil;
-import com.vivriti.investron.common.response.ApiResponse;
-import com.vivriti.investron.common.utils.CoreUtil;
+import com.jahnavi.contribution.dto.ApiResponse;
+import com.jahnavi.contribution.security.UserSessionUtil;
+import com.jahnavi.contribution.util.CoreUtil;
 import com.jahnavi.contribution.contribution_management.dto.AutoTagRequest;
 import com.jahnavi.contribution.contribution_management.dto.AutoTagResponse;
 import com.jahnavi.contribution.contribution_management.dto.BulkDdnMappingResponse;

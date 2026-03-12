@@ -13,7 +13,7 @@ import com.jahnavi.contribution.contribution_management.repository.RawCreditComb
 import com.jahnavi.contribution.contribution_management.repository.VirtualAccountRepository;
 import com.jahnavi.contribution.contribution_management.repository.VirtualAccountTransactionRepository;
 import com.jahnavi.contribution.contribution_management.service.ClassificationService;
-import com.vivriti.investron.common.exception.CoreException;
+import com.jahnavi.contribution.exception.CoreException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -4,8 +4,8 @@ import com.jahnavi.contribution.contribution_management.dto.BulkClassificationDe
 import com.jahnavi.contribution.contribution_management.dto.ClassificationResponseDto;
 import com.jahnavi.contribution.contribution_management.enums.Classification;
 import com.jahnavi.contribution.contribution_management.service.ClassificationService;
-import com.vivriti.investron.common.response.ApiResponse;
-import com.vivriti.investron.common.utils.CoreUtil;
+import com.jahnavi.contribution.dto.ApiResponse;
+import com.jahnavi.contribution.util.CoreUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;

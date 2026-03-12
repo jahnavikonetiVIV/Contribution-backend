@@ -12,13 +12,7 @@ import com.jahnavi.contribution.contribution_management.repository.MisUploadRepo
 import com.jahnavi.contribution.contribution_management.repository.RawCreditCombinedRepository;
 import com.jahnavi.contribution.contribution_management.repository.VirtualAccountRepository;
 import com.jahnavi.contribution.contribution_management.repository.VirtualAccountTransactionRepository;
-import com.vivriti.investron.common.config.AppConfig;
-import com.vivriti.investron.common.dto.MailRequestDto;
-import com.vivriti.investron.common.dto.UserWithRolesDto;
-import com.vivriti.investron.common.exception.CoreException;
-import com.vivriti.investron.common.feign.NotificationFeignClientHelper;
-import com.vivriti.investron.common.response.MailerApiResponse;
-import com.vivriti.investron.common.service.AuthenticationService;
+import com.jahnavi.contribution.exception.CoreException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
