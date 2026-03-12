@@ -43,7 +43,7 @@ COPY --from=builder /app/build/libs/Billing-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose the port on which your Spring Boot application will listen.
 # Based on your application.properties, this is 9090.
-EXPOSE 9090
+EXPOSE 8080
 
 # Define the command to run your application when the container starts.
 # `java -jar app.jar` executes the Spring Boot application.
