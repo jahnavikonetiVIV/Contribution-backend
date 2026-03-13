@@ -50,12 +50,13 @@ public class EcollectMisReportServiceImpl {
                 log.warn("No attachments found for {}", key);
                 return;
             }
-
+    log.info("data going");
             for (MultipartFile file : attachments) {
                 if (!isSupportedMisFile(file.getOriginalFilename())) {
-                    log.debug("Skipping unsupported attachment (not xlsx/xls/csv): {}", file.getOriginalFilename());
+                    log.info("Skipping unsupported attachment (not xlsx/xls/csv): {}", file.getOriginalFilename());
                     continue;
                 }
+                log.info("data-rty");
                 misProcessingServiceImpl.processMisReportFile(file, null, key, senderEmail);
             }
 
@@ -204,7 +205,7 @@ public class EcollectMisReportServiceImpl {
 
         @Override
         public void transferTo(@NotNull java.io.File dest) {
-            throw new UnsupportedOperationException();
+            throw new CoreException(HttpStatus.BAD_REQUEST.value(), "Transfer to file not supported");
         }
     }
 }

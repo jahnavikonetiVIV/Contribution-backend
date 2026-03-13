@@ -140,7 +140,7 @@ public class RawCreditServiceImpl implements RawCreditService {
         if (rowNum <= 1) {
             wb.dispose();
             String recordType = isWebhook ? CLASSIFICATION_WEBHOOK : "Combined";
-            throw new CoreException(HttpStatus.NOT_FOUND.value(),
+            throw new CoreException(HttpStatus.BAD_REQUEST.value(),
                     String.format("No %s records found for download. Please ensure there are %s records before downloading.", recordType, recordType));
         }
 

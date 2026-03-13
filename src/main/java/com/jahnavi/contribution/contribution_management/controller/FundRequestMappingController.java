@@ -5,14 +5,14 @@ import com.jahnavi.contribution.security.UserSessionUtil;
 import com.jahnavi.contribution.util.CoreUtil;
 import com.jahnavi.contribution.contribution_management.dto.AutoTagRequest;
 import com.jahnavi.contribution.contribution_management.dto.AutoTagResponse;
-import com.jahnavi.contribution.contribution_management.dto.BulkDdnMappingResponse;
-import com.jahnavi.contribution.contribution_management.dto.DdnMappingFilterRequest;
-import com.jahnavi.contribution.contribution_management.dto.DdnMappingHistoryDto;
-import com.jahnavi.contribution.contribution_management.dto.DdnMappingManualRequest;
-import com.jahnavi.contribution.contribution_management.dto.DdnMappingResponse;
+import com.jahnavi.contribution.contribution_management.dto.BulkFundRequestMappingResponse;
+import com.jahnavi.contribution.contribution_management.dto.FundRequestMappingFilterRequest;
+import com.jahnavi.contribution.contribution_management.dto.FundRequestMappingHistoryDto;
+import com.jahnavi.contribution.contribution_management.dto.FundRequestMappingManualRequest;
+import com.jahnavi.contribution.contribution_management.dto.FundRequestMappingResponse;
 import com.jahnavi.contribution.contribution_management.dto.TransactionAmountRequest;
 import com.jahnavi.contribution.contribution_management.dto.TransactionAmountResponse;
-import com.jahnavi.contribution.contribution_management.service.DdnMappingService;
+import com.jahnavi.contribution.contribution_management.service.FundRequestMappingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,14 +36,14 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/contribution-management/ddn-mappings")
-@Tag(name = "DDN Contribution Mapping", description = "APIs for auto-tagging, manual, and bulk mapping of contributions to DDNs")
-public class DdnMappingController {
+@RequestMapping("/api/v1/contribution-management/fund-request-mappings")
+@Tag(name = "Fund Request Contribution Mapping", description = "APIs for auto-tagging, manual, and bulk mapping of contributions to Fund Requests")
+public class FundRequestMappingController {
 
-    private final DdnMappingService ddnMappingService;
+    private final FundRequestMappingService fundRequestMappingService;
 
     @PostMapping("/auto-tag")
-    @Operation(summary = "Auto-tag contributions to DDNs", description = "Automatically tags approved receipts to matching DDNs within due date window")
+    @Operation(summary = "Auto-tag contributions to Fund Requests", description = "Automatically tags approved receipts to matching Fund Requests within due date window")
     public ResponseEntity<ApiResponse> autoTagContributions(@RequestBody(required = false) AutoTagRequest request) {
         log.info("Received request to auto-tag contributions");
 
@@ -51,7 +51,7 @@ public class DdnMappingController {
             request = new AutoTagRequest();
         }
 
-        AutoTagResponse response = ddnMappingService.autoTagContributions(request);
+        AutoTagResponse response = fundRequestMappingService.autoTagContributions(request);
 
         String message = String.format("Auto-tagging completed. Success: %d, Failed: %d", response.getSuccessCount(), response.getFailedCount());
         return CoreUtil.buildApiResponse(response, false, message, HttpStatus.OK);
@@ -62,7 +62,7 @@ public class DdnMappingController {
     public ResponseEntity<ApiResponse> getAutoTaggedContributions() {
         log.info("Fetching auto-tagged contributions");
 
-        List<DdnMappingResponse> mappings = ddnMappingService.getAutoTaggedContributions();
+        List<FundRequestMappingResponse> mappings = fundRequestMappingService.getAutoTaggedContributions();
 
         return CoreUtil.buildApiResponse(mappings, false, "Auto-tagged contributions fetched successfully", HttpStatus.OK);
     }
@@ -72,33 +72,31 @@ public class DdnMappingController {
     public ResponseEntity<ApiResponse> getManualMappings() {
         log.info("Fetching manual mappings");
 
-        List<DdnMappingResponse> mappings = ddnMappingService.getManualMappings();
+        List<FundRequestMappingResponse> mappings = fundRequestMappingService.getManualMappings();
 
-        return CoreUtil.buildApiResponse(mappings, false, 
-                String.format("Found %d manual mappings", mappings.size()), 
+        return CoreUtil.buildApiResponse(mappings, false,
+                String.format("Found %d manual mappings", mappings.size()),
                 HttpStatus.OK);
     }
 
-
     @PostMapping("/manual")
-    @Operation(summary = "Create manual mapping", description = "Manually map a single approved transaction to DDN(s) with absolute split")
-    public ResponseEntity<ApiResponse> createManualMapping(@Valid @RequestBody DdnMappingManualRequest request) {
+    @Operation(summary = "Create manual mapping", description = "Manually map a single approved transaction to Fund Request(s) with absolute split")
+    public ResponseEntity<ApiResponse> createManualMapping(@Valid @RequestBody FundRequestMappingManualRequest request) {
 
         log.info("Creating manual mapping for UTR: {}", request.getUtr());
 
         String userEmail = UserSessionUtil.getUserEmail();
-        DdnMappingResponse response = ddnMappingService.createManualMapping(request, userEmail);
+        FundRequestMappingResponse response = fundRequestMappingService.createManualMapping(request, userEmail);
         return CoreUtil.buildApiResponse(response, false, "Manual mapping created successfully", HttpStatus.CREATED);
-
     }
 
     @PostMapping(value = "/bulk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Bulk upload DDN mappings", description = "Upload CSV/XLSX file to map multiple contributions to DDNs. Maximum file size: 5MB")
+    @Operation(summary = "Bulk upload Fund Request mappings", description = "Upload CSV/XLSX file to map multiple contributions to Fund Requests. Maximum file size: 5MB")
     public ResponseEntity<ApiResponse> bulkUploadMappings(@RequestParam("file") MultipartFile file) {
-        log.info("Processing bulk DDN mapping upload. Filename: {}", file.getOriginalFilename());
+        log.info("Processing bulk Fund Request mapping upload. Filename: {}", file.getOriginalFilename());
 
         String userEmail = getCurrentUserEmail();
-        BulkDdnMappingResponse response = ddnMappingService.bulkUploadMappings(file, userEmail);
+        BulkFundRequestMappingResponse response = fundRequestMappingService.bulkUploadMappings(file, userEmail);
 
         boolean hasErrors = response.getFailedCount() > 0;
         HttpStatus status = hasErrors ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK;
@@ -106,10 +104,10 @@ public class DdnMappingController {
     }
 
     @GetMapping("/bulk/template")
-    @Operation(summary = "Download bulk mapping template", description = "Downloads sample Excel template for bulk DDN mapping")
+    @Operation(summary = "Download bulk mapping template", description = "Downloads sample Excel template for bulk Fund Request mapping")
     public void downloadBulkMappingTemplate(HttpServletResponse response) throws IOException {
         log.info("Downloading bulk mapping template");
-        ddnMappingService.downloadBulkMappingTemplate(response);
+        fundRequestMappingService.downloadBulkMappingTemplate(response);
     }
 
     @GetMapping("/history")
@@ -131,7 +129,7 @@ public class DdnMappingController {
 
         log.info("Fetching mapping history with filters");
 
-        DdnMappingFilterRequest filterRequest = DdnMappingFilterRequest.builder()
+        FundRequestMappingFilterRequest filterRequest = FundRequestMappingFilterRequest.builder()
                 .utr(utr)
                 .masterVa(masterVa)
                 .vaAccount(vaAccount)
@@ -145,7 +143,7 @@ public class DdnMappingController {
                 .sortDirection(sortDirection)
                 .build();
 
-        Page<DdnMappingHistoryDto> history = ddnMappingService.getMappingHistory(filterRequest);
+        Page<FundRequestMappingHistoryDto> history = fundRequestMappingService.getMappingHistory(filterRequest);
 
         return CoreUtil.buildApiResponse(history, false, "Mapping history fetched successfully", HttpStatus.OK);
     }
@@ -166,7 +164,7 @@ public class DdnMappingController {
 
         log.info("Exporting mapping history");
 
-        DdnMappingFilterRequest filterRequest = DdnMappingFilterRequest.builder()
+        FundRequestMappingFilterRequest filterRequest = FundRequestMappingFilterRequest.builder()
                 .utr(utr)
                 .masterVa(masterVa)
                 .vaAccount(vaAccount)
@@ -176,39 +174,34 @@ public class DdnMappingController {
                 .transactionSources(transactionSources)
                 .build();
 
-        ddnMappingService.exportMappingHistory(filterRequest, response);
+        fundRequestMappingService.exportMappingHistory(filterRequest, response);
     }
 
     @PostMapping("/dropdowns")
-    @Operation(summary = "Get Dropdowns by UTR and IFSC", 
-               description = "Fetches transaction amount and DDN dropdown options from VirtualAccountTransaction table based on exact UTR and exact IFSC code match. Both must match exactly. " +
-                             "Each DDN option includes both individual fields (ddnId, calculationId) and a combined compositeId field (format: ddnId|calculationId) " +
-                             "that can be used as the dropdown value. The composite key (documentId + calculationId) uniquely identifies each DDN.")
+    @Operation(summary = "Get Dropdowns by UTR and IFSC",
+            description = "Fetches transaction amount and Fund Request dropdown options from VirtualAccountTransaction table based on exact UTR and exact IFSC code match. Both must match exactly. " +
+                    "Each Fund Request option includes fundRequestId, calculationId and compositeId for dropdown value.")
     public ResponseEntity<ApiResponse> getDropdownBasedOnUtrAndIfsc(
             @Valid @RequestBody TransactionAmountRequest request) {
-        
+
         log.info("Fetching transaction amount for UTR: {} and IFSC: {}", request.getUtr(), request.getIfscCode());
 
-        TransactionAmountResponse response = ddnMappingService.getDropdownBasedOnUtrAndIfsc(request);
+        TransactionAmountResponse response = fundRequestMappingService.getDropdownBasedOnUtrAndIfsc(request);
 
-        String message = "Transaction details and DDN dropdowns fetched successfully for UTR: " + request.getUtr();
+        String message = "Transaction details and Fund Request dropdowns fetched successfully for UTR: " + request.getUtr();
 
         return CoreUtil.buildApiResponse(response, false, message, HttpStatus.OK);
     }
 
-    /**
-     * Helper method to get current authenticated user's email
-     */
     private String getCurrentUserEmail() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.isAuthenticated()) {
-                return authentication.getName(); // Usually the email or username
+                return authentication.getName();
             }
         } catch (Exception e) {
             log.warn("Could not retrieve authenticated user email: {}", e.getMessage());
         }
-        return "system@investron.com"; // Fallback
+        return "system@investron.com";
     }
 }
-

@@ -48,7 +48,7 @@ public class InvestorDataController {
     @Operation(summary = "Update investor data")
     public ResponseEntity<ApiResponse> update(@PathVariable Long id, @RequestBody InvestorDataDto dto) {
         InvestorData entity = investorDataRepository.findById(id)
-                .orElseThrow(() -> new com.jahnavi.contribution.exception.CoreException(404, "Investor data not found"));
+                .orElseThrow(() -> new com.jahnavi.contribution.exception.CoreException(400, "Investor data not found"));
         entity.setInvestorName(dto.getInvestorName());
         entity.setVirtualAccountNumber(dto.getVirtualAccountNumber());
         entity.setBankAccountNumber(dto.getBankAccountNumber());

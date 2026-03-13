@@ -8,13 +8,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "ddn_contribution_mapping")
+@Table(name = "fund_request_contribution_mapping")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DdnContributionMapping extends BaseEntity {
+public class FundRequestContributionMapping extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,29 +50,26 @@ public class DdnContributionMapping extends BaseEntity {
     @Column(name = "remarks", length = 500)
     private String remarks;
 
-    // Split amounts
     @Column(name = "initial_amount", precision = 19, scale = 2)
     private BigDecimal initialAmount;
-
 
     @Column(name = "ifsc_code")
     private String ifscCode;
 
-    @Column(name = "initial_commitment_ddn_id", length = 100)
-    private String initialCommitmentDdnId;
+    @Column(name = "initial_commitment_fund_request_id", length = 100)
+    private String initialCommitmentFundRequestId;
 
     @Column(name = "topup_amount", precision = 19, scale = 2)
     private BigDecimal topupAmount;
 
-    @Column(name = "topup_ddn_id", length = 100)
-    private String topupDdnId;
+    @Column(name = "topup_fund_request_id", length = 100)
+    private String topupFundRequestId;
 
     @Column(name = "excess_amount", precision = 19, scale = 2)
     private BigDecimal excessAmount;
 
-    // Mapping metadata
     @Column(name = "mapping_source", length = 255)
-    private String mappingSource; // "System" or user email
+    private String mappingSource;
 
     @Column(name = "mapping_type", length = 50)
     private String mappingType; // AUTO / MANUAL / BULK
@@ -86,4 +83,3 @@ public class DdnContributionMapping extends BaseEntity {
     @Column(name = "mapped_by", length = 255)
     private String mappedBy;
 }
-

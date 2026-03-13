@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class AutoTagResultDto {
     private String utr;
     private String folio;
-    private String ddnId;
+    private String fundRequestId;
     private BigDecimal amount;
     private String status;
     private String message;

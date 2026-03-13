@@ -35,13 +35,8 @@ import java.util.stream.Stream;
 @Slf4j
 @RequiredArgsConstructor
 public class MisProcessingServiceImpl {
-    private static final String DEFAULT_EMAIL_TEMPLATE = "default-email-template";
-    private static final String DEFAULT_FROM = "No_Reply@vivritiamc.com";
+
     private static final String PARSE_ERROR = "PARSE_ERROR";
-    private static final String ROLE_OPS_HEAD = "ROLE_OPS_HEAD";
-    private static final String ROLE_SUPER_ADMIN = "SUPER_ADMIN";
-    private static final String MIS_ALERT_SUBJECT = "Issue found in MIS ingestion for contribution mapping from bank";
-    private static final DateTimeFormatter MIS_ALERT_DATETIME_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
     private final VirtualAccountRepository virtualAccountRepository;
     private final MisReportParserHelper misReportParserHelper;
@@ -59,6 +54,7 @@ public class MisProcessingServiceImpl {
                                      String senderEmail) throws IOException {
 
         MisUpload misUpload = createInitialMisUpload(file, senderEmail);
+        log.info("data {}",misUpload);
         Long misBatchId = misUpload.getId();
         Set<String> fundNames = new LinkedHashSet<>();
 

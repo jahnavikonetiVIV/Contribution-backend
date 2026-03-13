@@ -130,7 +130,7 @@ public class ClassificationServiceImpl implements ClassificationService {
             log.info("Classification report downloaded successfully");
         } catch (Exception e) {
             log.error("Error generating classification report: {}", e.getMessage(), e);
-            throw new CoreException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            throw new CoreException(HttpStatus.BAD_REQUEST.value(),
                     "Error generating classification report: " + e.getMessage());
         }
     }
@@ -481,7 +481,7 @@ public class ClassificationServiceImpl implements ClassificationService {
                 .findByUtrAndIfscPrefix(dto.getUtr().trim(), ifscPrefix);
 
         if (transactionOpt.isEmpty()) {
-            throw new CoreException(HttpStatus.NOT_FOUND.value(),
+            throw new CoreException(HttpStatus.BAD_REQUEST.value(),
                     "Transaction not found for UTR: " + dto.getUtr());
         }
 

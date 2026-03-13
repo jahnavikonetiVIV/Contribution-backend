@@ -32,7 +32,7 @@ public class TransactionAmountResponse {
     private String folio; // Extracted folio number
     private Boolean ifscMatched; // Indicates if IFSC validation passed
     
-    // DDN Dropdown Options based on folio
-    private List<DdnOptionDto> initialCommitmentDdns;
-    private List<DdnOptionDto> topupDdns;
+    // Fund Request Dropdown Options based on folio
+    private List<FundRequestOptionDto> initialCommitmentFundRequests;
+    private List<FundRequestOptionDto> topupFundRequests;
 }

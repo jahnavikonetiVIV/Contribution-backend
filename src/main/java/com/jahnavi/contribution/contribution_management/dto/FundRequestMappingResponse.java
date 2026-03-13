@@ -12,25 +12,29 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DdnMappingHistoryDto {
+public class FundRequestMappingResponse {
     private Long id;
     private String utr;
     private String masterVa;
     private String vaAccount;
-    private String remarks;
-    private String transactionSource;
-    private BigDecimal totalTransactionAmount;
     private String folio;
+    private Long fundId;
     private String fundName;
+    private BigDecimal totalTransactionAmount;
     private LocalDateTime transactionDateTime;
+    private String transactionSource;
+    private String remarks;
+
     private BigDecimal initialAmount;
-    private String initialCommitmentDdnId;
+    private String ifscCode;
+    private String initialCommitmentFundRequestId;
     private BigDecimal topupAmount;
-    private String topupDdnId;
+    private String topupFundRequestId;
     private BigDecimal excessAmount;
+
     private String mappingSource;
     private String mappingType;
+    private String status;
     private LocalDateTime mappedAt;
     private String mappedBy;
 }
-

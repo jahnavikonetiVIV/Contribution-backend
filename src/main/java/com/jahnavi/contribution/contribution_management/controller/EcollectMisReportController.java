@@ -86,13 +86,13 @@ public class EcollectMisReportController {
         } catch (Exception e) {
             log.error("Error processing MIS report file: {}", e.getMessage(), e);
             return CoreUtil.buildApiResponse(
-                null, 
-                httpServletRequest, 
-                "Failed to process MIS report file: " + e.getMessage(), 
-                HttpStatus.INTERNAL_SERVER_ERROR.value(), 
-                HttpStatus.INTERNAL_SERVER_ERROR.value(), 
-                HttpStatus.INTERNAL_SERVER_ERROR, 
-                HttpStatus.INTERNAL_SERVER_ERROR
+                null,
+                httpServletRequest,
+                "Failed to process MIS report file: " + e.getMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST,
+                HttpStatus.BAD_REQUEST
             );
         }
     }

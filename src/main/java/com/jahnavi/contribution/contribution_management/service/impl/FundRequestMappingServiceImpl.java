@@ -3,26 +3,26 @@ package com.jahnavi.contribution.contribution_management.service.impl;
 import com.jahnavi.contribution.contribution_management.dto.AutoTagRequest;
 import com.jahnavi.contribution.contribution_management.dto.AutoTagResponse;
 import com.jahnavi.contribution.contribution_management.dto.AutoTagResultDto;
-import com.jahnavi.contribution.contribution_management.dto.BulkDdnMappingResponse;
-import com.jahnavi.contribution.contribution_management.dto.BulkDdnMappingUploadRow;
-import com.jahnavi.contribution.contribution_management.dto.DdnMappingFilterRequest;
-import com.jahnavi.contribution.contribution_management.dto.DdnMappingHistoryDto;
-import com.jahnavi.contribution.contribution_management.dto.DdnMappingManualRequest;
-import com.jahnavi.contribution.contribution_management.dto.DdnMappingResponse;
-import com.jahnavi.contribution.contribution_management.dto.DdnOptionDto;
+import com.jahnavi.contribution.contribution_management.dto.BulkFundRequestMappingResponse;
+import com.jahnavi.contribution.contribution_management.dto.BulkFundRequestMappingUploadRow;
+import com.jahnavi.contribution.contribution_management.dto.FundRequestMappingFilterRequest;
+import com.jahnavi.contribution.contribution_management.dto.FundRequestMappingHistoryDto;
+import com.jahnavi.contribution.contribution_management.dto.FundRequestMappingManualRequest;
+import com.jahnavi.contribution.contribution_management.dto.FundRequestMappingResponse;
+import com.jahnavi.contribution.contribution_management.dto.FundRequestOptionDto;
 import com.jahnavi.contribution.contribution_management.dto.TransactionAmountRequest;
 import com.jahnavi.contribution.contribution_management.dto.TransactionAmountResponse;
-import com.jahnavi.contribution.contribution_management.entity.DdnContributionMapping;
+import com.jahnavi.contribution.contribution_management.entity.FundRequestContributionMapping;
 import com.jahnavi.contribution.contribution_management.entity.VirtualAccount;
 import com.jahnavi.contribution.contribution_management.entity.VirtualAccountTransaction;
 import com.jahnavi.contribution.contribution_management.enums.Classification;
 import com.jahnavi.contribution.contribution_management.enums.ClassificationStatus;
-import com.jahnavi.contribution.contribution_management.repository.DdnContributionMappingRepository;
-import com.jahnavi.contribution.contribution_management.repository.DdnMappingSpecification;
+import com.jahnavi.contribution.contribution_management.repository.FundRequestContributionMappingRepository;
+import com.jahnavi.contribution.contribution_management.repository.FundRequestMappingSpecification;
 import com.jahnavi.contribution.contribution_management.repository.VirtualAccountRepository;
 import com.jahnavi.contribution.contribution_management.repository.VirtualAccountTransactionRepository;
-import com.jahnavi.contribution.contribution_management.service.DdnDataService;
-import com.jahnavi.contribution.contribution_management.service.DdnMappingService;
+import com.jahnavi.contribution.contribution_management.service.FundRequestDataService;
+import com.jahnavi.contribution.contribution_management.service.FundRequestMappingService;
 import com.jahnavi.contribution.exception.CoreException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +56,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DdnMappingServiceImpl implements DdnMappingService {
+public class FundRequestMappingServiceImpl implements FundRequestMappingService {
 
     private static final String MAPPING_TYPE_AUTO = "AUTO";
     private static final String MAPPING_TYPE_MANUAL = "MANUAL";
@@ -73,15 +73,15 @@ public class DdnMappingServiceImpl implements DdnMappingService {
     private static final String HEADER_IFSC = "IFSC";
     private static final String HEADER_TRANSACTION_AMOUNT = "Transaction Amount";
     private static final String HEADER_INITIAL_AMOUNT = "Initial Amount";
-    private static final String HEADER_INITIAL_COMMITMENT_DDN_ID = "Initial Commitment DDN ID";
+    private static final String HEADER_INITIAL_COMMITMENT_FUND_REQUEST_ID = "Initial Commitment Fund Request ID";
     private static final String HEADER_TOPUP_AMOUNT = "Topup Amount";
-    private static final String HEADER_TOPUP_DDN_ID = "Topup DDN ID";
+    private static final String HEADER_TOPUP_FUND_REQUEST_ID = "Topup Fund Request ID";
     private static final String HEADER_EXCESS_AMOUNT = "Excess Amount";
 
-    private final DdnContributionMappingRepository ddnContributionMappingRepository;
+    private final FundRequestContributionMappingRepository fundRequestContributionMappingRepository;
     private final VirtualAccountTransactionRepository transactionRepository;
     private final VirtualAccountRepository virtualAccountRepository;
-    private final DdnDataService ddnDataService;
+    private final FundRequestDataService fundRequestDataService;
 
     @Override
     @Transactional
@@ -93,11 +93,11 @@ public class DdnMappingServiceImpl implements DdnMappingService {
 
         for (VirtualAccountTransaction receipt : approvedReceipts) {
             try {
-                DdnMappingResponse mapping = createAutoMapping(receipt);
-                String ddnId = mapping.getInitialCommitmentDdnId() != null
-                        ? mapping.getInitialCommitmentDdnId()
-                        : mapping.getTopupDdnId();
-                results.add(createSuccessResult(mapping.getUtr(), mapping.getFolio(), ddnId, mapping.getTotalTransactionAmount()));
+                FundRequestMappingResponse mapping = createAutoMapping(receipt);
+                String fundRequestId = mapping.getInitialCommitmentFundRequestId() != null
+                        ? mapping.getInitialCommitmentFundRequestId()
+                        : mapping.getTopupFundRequestId();
+                results.add(createSuccessResult(mapping.getUtr(), mapping.getFolio(), fundRequestId, mapping.getTotalTransactionAmount()));
                 successCount++;
             } catch (Exception ex) {
                 log.warn("Auto-tag skipped for UTR {}: {}", receipt.getUtr(), ex.getMessage());
@@ -118,16 +118,16 @@ public class DdnMappingServiceImpl implements DdnMappingService {
     }
 
     @Override
-    public List<DdnMappingResponse> getAutoTaggedContributions() {
-        return ddnContributionMappingRepository.findByMappingTypeAndStatus(MAPPING_TYPE_AUTO, STATUS_ACTIVE)
+    public List<FundRequestMappingResponse> getAutoTaggedContributions() {
+        return fundRequestContributionMappingRepository.findByMappingTypeAndStatus(MAPPING_TYPE_AUTO, STATUS_ACTIVE)
                 .stream()
                 .map(this::convertToResponse)
                 .toList();
     }
 
     @Override
-    public List<DdnMappingResponse> getManualMappings() {
-        return ddnContributionMappingRepository.findByMappingTypeAndStatus(MAPPING_TYPE_MANUAL, STATUS_ACTIVE)
+    public List<FundRequestMappingResponse> getManualMappings() {
+        return fundRequestContributionMappingRepository.findByMappingTypeAndStatus(MAPPING_TYPE_MANUAL, STATUS_ACTIVE)
                 .stream()
                 .map(this::convertToResponse)
                 .toList();
@@ -135,18 +135,18 @@ public class DdnMappingServiceImpl implements DdnMappingService {
 
     @Override
     @Transactional
-    public DdnMappingResponse createManualMapping(DdnMappingManualRequest request, String userEmail) {
-        DdnContributionMapping mapping = createAndSaveMapping(request, userEmail, MAPPING_TYPE_MANUAL);
+    public FundRequestMappingResponse createManualMapping(FundRequestMappingManualRequest request, String userEmail) {
+        FundRequestContributionMapping mapping = createAndSaveMapping(request, userEmail, MAPPING_TYPE_MANUAL);
         return convertToResponse(mapping);
     }
 
     @Override
     @Transactional
-    public BulkDdnMappingResponse bulkUploadMappings(MultipartFile file, String userEmail) {
+    public BulkFundRequestMappingResponse bulkUploadMappings(MultipartFile file, String userEmail) {
         validateFile(file);
 
-        List<BulkDdnMappingUploadRow> failedRows = new ArrayList<>();
-        List<DdnMappingResponse> successfulMappings = new ArrayList<>();
+        List<BulkFundRequestMappingUploadRow> failedRows = new ArrayList<>();
+        List<FundRequestMappingResponse> successfulMappings = new ArrayList<>();
         int totalRecords = 0;
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
@@ -159,9 +159,9 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 }
 
                 totalRecords++;
-                BulkDdnMappingUploadRow uploadRow = parseRow(row, i + 1);
+                BulkFundRequestMappingUploadRow uploadRow = parseRow(row, i + 1);
                 try {
-                    DdnContributionMapping mapping = createAndSaveMapping(convertToManualRequest(uploadRow), userEmail, MAPPING_TYPE_BULK);
+                    FundRequestContributionMapping mapping = createAndSaveMapping(convertToManualRequest(uploadRow), userEmail, MAPPING_TYPE_BULK);
                     uploadRow.setStatus(STATUS_SUCCESS);
                     successfulMappings.add(convertToResponse(mapping));
                 } catch (Exception ex) {
@@ -174,7 +174,7 @@ public class DdnMappingServiceImpl implements DdnMappingService {
             throw new CoreException(HttpStatus.BAD_REQUEST.value(), "Error reading file: " + ex.getMessage(), ex);
         }
 
-        return BulkDdnMappingResponse.builder()
+        return BulkFundRequestMappingResponse.builder()
                 .totalRecords(totalRecords)
                 .processedRecords(totalRecords)
                 .successCount(successfulMappings.size())
@@ -189,14 +189,14 @@ public class DdnMappingServiceImpl implements DdnMappingService {
     @Override
     public void downloadBulkMappingTemplate(HttpServletResponse response) throws IOException {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=DDN_Bulk_Mapping_Template.xlsx");
+        response.setHeader("Content-Disposition", "attachment; filename=FundRequest_Bulk_Mapping_Template.xlsx");
 
         try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("DDN Mapping");
+            Sheet sheet = workbook.createSheet("Fund Request Mapping");
             Row headerRow = sheet.createRow(0);
             String[] headers = {
                     HEADER_UTR, HEADER_IFSC, HEADER_TRANSACTION_AMOUNT, HEADER_INITIAL_AMOUNT,
-                    HEADER_INITIAL_COMMITMENT_DDN_ID, HEADER_TOPUP_AMOUNT, HEADER_TOPUP_DDN_ID, HEADER_EXCESS_AMOUNT
+                    HEADER_INITIAL_COMMITMENT_FUND_REQUEST_ID, HEADER_TOPUP_AMOUNT, HEADER_TOPUP_FUND_REQUEST_ID, HEADER_EXCESS_AMOUNT
             };
 
             CellStyle headerStyle = workbook.createCellStyle();
@@ -216,9 +216,9 @@ public class DdnMappingServiceImpl implements DdnMappingService {
     }
 
     @Override
-    public Page<DdnMappingHistoryDto> getMappingHistory(DdnMappingFilterRequest filterRequest) {
+    public Page<FundRequestMappingHistoryDto> getMappingHistory(FundRequestMappingFilterRequest filterRequest) {
         Pageable pageable = createPageable(filterRequest);
-        Specification<DdnContributionMapping> spec = DdnMappingSpecification.filterBy(
+        Specification<FundRequestContributionMapping> spec = FundRequestMappingSpecification.filterBy(
                 filterRequest.getUtr(),
                 filterRequest.getMasterVa(),
                 filterRequest.getVaAccount(),
@@ -227,12 +227,12 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 filterRequest.getDateFrom(),
                 filterRequest.getDateTo()
         );
-        return ddnContributionMappingRepository.findAll(spec, pageable).map(this::convertToHistoryDto);
+        return fundRequestContributionMappingRepository.findAll(spec, pageable).map(this::convertToHistoryDto);
     }
 
     @Override
-    public void exportMappingHistory(DdnMappingFilterRequest filterRequest, HttpServletResponse response) throws IOException {
-        Specification<DdnContributionMapping> spec = DdnMappingSpecification.filterBy(
+    public void exportMappingHistory(FundRequestMappingFilterRequest filterRequest, HttpServletResponse response) throws IOException {
+        Specification<FundRequestContributionMapping> spec = FundRequestMappingSpecification.filterBy(
                 filterRequest.getUtr(),
                 filterRequest.getMasterVa(),
                 filterRequest.getVaAccount(),
@@ -242,11 +242,11 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 filterRequest.getDateTo()
         );
 
-        List<DdnContributionMapping> mappings = ddnContributionMappingRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "mappedAt"));
+        List<FundRequestContributionMapping> mappings = fundRequestContributionMappingRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "mappedAt"));
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition",
-                "attachment; filename=DDN_Mapping_History_" +
+                "attachment; filename=FundRequest_Mapping_History_" +
                         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".xlsx");
 
         try (Workbook workbook = new XSSFWorkbook()) {
@@ -255,7 +255,7 @@ public class DdnMappingServiceImpl implements DdnMappingService {
             String[] headers = {
                     "UTR", "Master VA", "VA Account", "Remarks", "Transaction Source",
                     "Total Transaction Amount", "Folio", "Fund", "Transaction Date Time",
-                    "Initial Amount", "Initial DDN ID", "Topup Amount", "Topup DDN ID",
+                    "Initial Amount", "Initial Fund Request ID", "Topup Amount", "Topup Fund Request ID",
                     "Excess Amount", "Mapping Source", "Mapping Type", "Mapped At"
             };
 
@@ -264,7 +264,7 @@ public class DdnMappingServiceImpl implements DdnMappingService {
             }
 
             int rowNum = 1;
-            for (DdnContributionMapping mapping : mappings) {
+            for (FundRequestContributionMapping mapping : mappings) {
                 writeHistoryRow(sheet.createRow(rowNum++), mapping);
             }
 
@@ -277,18 +277,18 @@ public class DdnMappingServiceImpl implements DdnMappingService {
         VirtualAccountTransaction transaction = transactionRepository.findByUtrAndRemitterIfsc(
                         request.getUtr(), request.getIfscCode())
                 .orElseThrow(() -> new CoreException(
-                        HttpStatus.NOT_FOUND.value(),
+                        HttpStatus.BAD_REQUEST.value(),
                         String.format("Transaction not found for UTR: %s and IFSC: %s", request.getUtr(), request.getIfscCode())));
 
         if (transaction.getClassification() == Classification.IMPROPER) {
             throw new CoreException(HttpStatus.BAD_REQUEST.value(),
-                    "Improper transactions cannot be used for DDN mapping. Please classify the transaction as Proper first.");
+                    "Improper transactions cannot be used for Fund Request mapping. Please classify the transaction as Proper first.");
         }
 
         String folio = resolveFolio(transaction);
         ensureInvestorCanMap(folio);
-        List<DdnOptionDto> openOptions = getOpenDdnOptionsForInvestor(folio).stream()
-                .map(option -> enrichDdnOption(option, transaction))
+        List<FundRequestOptionDto> openOptions = getOpenFundRequestOptionsForInvestor(folio).stream()
+                .map(option -> enrichFundRequestOption(option, transaction))
                 .toList();
 
         return TransactionAmountResponse.builder()
@@ -305,22 +305,22 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 .fundName(resolveFundName(transaction))
                 .folio(folio)
                 .ifscMatched(Boolean.TRUE)
-                .initialCommitmentDdns(openOptions.stream()
+                .initialCommitmentFundRequests(openOptions.stream()
                         .filter(option -> "Initial".equalsIgnoreCase(option.getCommitmentType()))
                         .toList())
-                .topupDdns(openOptions.stream()
+                .topupFundRequests(openOptions.stream()
                         .filter(option -> "Top-up".equalsIgnoreCase(option.getCommitmentType()))
                         .toList())
                 .build();
     }
 
-    private DdnContributionMapping createAndSaveMapping(DdnMappingManualRequest request, String userEmail, String mappingType) {
+    private FundRequestContributionMapping createAndSaveMapping(FundRequestMappingManualRequest request, String userEmail, String mappingType) {
         validateManualMappingRequest(request);
 
-        Optional<DdnContributionMapping> existingMapping = ddnContributionMappingRepository
+        Optional<FundRequestContributionMapping> existingMapping = fundRequestContributionMappingRepository
                 .findByUtrAndIfscCodeAndStatus(request.getUtr(), request.getIfscCode(), STATUS_ACTIVE);
         if (existingMapping.isPresent()) {
-            DdnContributionMapping existing = existingMapping.get();
+            FundRequestContributionMapping existing = existingMapping.get();
             throw new CoreException(HttpStatus.BAD_REQUEST.value(),
                     String.format("Provided IFSC: %s and UTR: %s already used by %s at %s",
                             request.getIfscCode(),
@@ -330,12 +330,12 @@ public class DdnMappingServiceImpl implements DdnMappingService {
         }
 
         VirtualAccountTransaction transaction = transactionRepository.findByUtrAndRemitterIfsc(request.getUtr(), request.getIfscCode())
-                .orElseThrow(() -> new CoreException(HttpStatus.NOT_FOUND.value(),
+                .orElseThrow(() -> new CoreException(HttpStatus.BAD_REQUEST.value(),
                         String.format("Transaction not found for UTR: %s and IFSC: %s", request.getUtr(), request.getIfscCode())));
 
         if (transaction.getClassification() == Classification.IMPROPER) {
             throw new CoreException(HttpStatus.BAD_REQUEST.value(),
-                    "Improper transactions cannot be used for DDN mapping. Please classify the transaction as Proper first.");
+                    "Improper transactions cannot be used for Fund Request mapping. Please classify the transaction as Proper first.");
         }
 
         BigDecimal transactionAmount = parseAmount(transaction.getTransactionAmount());
@@ -349,11 +349,11 @@ public class DdnMappingServiceImpl implements DdnMappingService {
 
         String folio = resolveFolio(transaction);
         ensureInvestorCanMap(folio);
-        validateAndTrackDdnPayment(request.getInitialCommitmentDdnId(), request.getInitialAmount(), folio);
-        validateAndTrackDdnPayment(request.getTopupDdnId(), request.getTopupAmount(), folio);
+        validateAndTrackFundRequestPayment(request.getInitialCommitmentFundRequestId(), request.getInitialAmount(), folio);
+        validateAndTrackFundRequestPayment(request.getTopupFundRequestId(), request.getTopupAmount(), folio);
 
         VirtualAccount va = resolveVirtualAccount(transaction);
-        DdnContributionMapping mapping = DdnContributionMapping.builder()
+        FundRequestContributionMapping mapping = FundRequestContributionMapping.builder()
                 .utr(request.getUtr())
                 .masterVa(va != null ? va.getVaPrefix() : "")
                 .vaAccount(transaction.getVirtualAccountNumber())
@@ -366,9 +366,9 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 .remarks(request.getRemarks())
                 .initialAmount(request.getInitialAmount())
                 .ifscCode(request.getIfscCode())
-                .initialCommitmentDdnId(request.getInitialCommitmentDdnId())
+                .initialCommitmentFundRequestId(request.getInitialCommitmentFundRequestId())
                 .topupAmount(request.getTopupAmount())
-                .topupDdnId(request.getTopupDdnId())
+                .topupFundRequestId(request.getTopupFundRequestId())
                 .excessAmount(request.getExcessAmount())
                 .mappingSource(userEmail)
                 .mappingType(mappingType)
@@ -376,30 +376,30 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 .mappedAt(LocalDateTime.now())
                 .mappedBy(userEmail)
                 .build();
-        return ddnContributionMappingRepository.save(mapping);
+        return fundRequestContributionMappingRepository.save(mapping);
     }
 
-    private DdnMappingResponse createAutoMapping(VirtualAccountTransaction receipt) {
+    private FundRequestMappingResponse createAutoMapping(VirtualAccountTransaction receipt) {
         String folio = resolveFolio(receipt);
         ensureInvestorCanMap(folio);
-        List<DdnOptionDto> openOptions = getOpenDdnOptionsForInvestor(folio);
+        List<FundRequestOptionDto> openOptions = getOpenFundRequestOptionsForInvestor(folio);
         BigDecimal amount = parseAmount(receipt.getTransactionAmount());
 
-        DdnOptionDto matchingOption = openOptions.stream()
+        FundRequestOptionDto matchingOption = openOptions.stream()
                 .filter(option -> option.getTotalPayableAmount() != null && option.getTotalPayableAmount().compareTo(amount) == 0)
                 .findFirst()
                 .orElseThrow(() -> new CoreException(HttpStatus.BAD_REQUEST.value(),
-                        "No matching DDN found for the transaction amount."));
+                        "No matching Fund Request found for the transaction amount."));
 
-        DdnMappingManualRequest request = DdnMappingManualRequest.builder()
+        FundRequestMappingManualRequest request = FundRequestMappingManualRequest.builder()
                 .utr(receipt.getUtr())
                 .ifscCode(receipt.getRemitterIfsc())
                 .transactionAmount(amount)
-                .remarks("Auto tagged using DDN data")
+                .remarks("Auto tagged using Fund Request data")
                 .initialAmount("Initial".equalsIgnoreCase(matchingOption.getCommitmentType()) ? amount : null)
-                .initialCommitmentDdnId("Initial".equalsIgnoreCase(matchingOption.getCommitmentType()) ? matchingOption.getDdnId() : null)
+                .initialCommitmentFundRequestId("Initial".equalsIgnoreCase(matchingOption.getCommitmentType()) ? matchingOption.getFundRequestId() : null)
                 .topupAmount("Top-up".equalsIgnoreCase(matchingOption.getCommitmentType()) ? amount : null)
-                .topupDdnId("Top-up".equalsIgnoreCase(matchingOption.getCommitmentType()) ? matchingOption.getDdnId() : null)
+                .topupFundRequestId("Top-up".equalsIgnoreCase(matchingOption.getCommitmentType()) ? matchingOption.getFundRequestId() : null)
                 .build();
 
         return convertToResponse(createAndSaveMapping(request, MAPPING_SOURCE_SYSTEM, MAPPING_TYPE_AUTO));
@@ -410,13 +410,13 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 .filter(t -> Classification.PROPER.equals(t.getClassification()))
                 .filter(t -> ClassificationStatus.SYSTEM_APPROVED.equals(t.getClassificationStatus()))
                 .filter(t -> TRANSACTION_SOURCE_MIS.equalsIgnoreCase(t.getSource()))
-                .filter(t -> !ddnContributionMappingRepository.existsByUtrAndStatus(t.getUtr(), STATUS_ACTIVE))
+                .filter(t -> !fundRequestContributionMappingRepository.existsByUtrAndStatus(t.getUtr(), STATUS_ACTIVE))
                 .filter(t -> request == null || request.getFolio() == null || request.getFolio().equalsIgnoreCase(resolveFolio(t)))
                 .filter(t -> request == null || request.getFundId() == null || request.getFundId().equals(resolveFundId(t)))
                 .toList();
     }
 
-    private void validateManualMappingRequest(DdnMappingManualRequest request) {
+    private void validateManualMappingRequest(FundRequestMappingManualRequest request) {
         BigDecimal initial = safeAmount(request.getInitialAmount());
         BigDecimal topup = safeAmount(request.getTopupAmount());
         BigDecimal excess = safeAmount(request.getExcessAmount());
@@ -425,13 +425,13 @@ public class DdnMappingServiceImpl implements DdnMappingService {
             throw new CoreException(HttpStatus.BAD_REQUEST.value(),
                     "At least one of initial amount, topup amount, or excess amount must be provided");
         }
-        if (initial.compareTo(BigDecimal.ZERO) > 0 && isBlank(request.getInitialCommitmentDdnId())) {
+        if (initial.compareTo(BigDecimal.ZERO) > 0 && isBlank(request.getInitialCommitmentFundRequestId())) {
             throw new CoreException(HttpStatus.BAD_REQUEST.value(),
-                    "Initial Commitment DDN ID is required when initial amount is provided");
+                    "Initial Commitment Fund Request ID is required when initial amount is provided");
         }
-        if (topup.compareTo(BigDecimal.ZERO) > 0 && isBlank(request.getTopupDdnId())) {
+        if (topup.compareTo(BigDecimal.ZERO) > 0 && isBlank(request.getTopupFundRequestId())) {
             throw new CoreException(HttpStatus.BAD_REQUEST.value(),
-                    "Topup DDN ID is required when topup amount is provided");
+                    "Topup Fund Request ID is required when topup amount is provided");
         }
     }
 
@@ -446,25 +446,25 @@ public class DdnMappingServiceImpl implements DdnMappingService {
         }
     }
 
-    private void validateAndTrackDdnPayment(String ddnId, BigDecimal amount, String folio) {
-        if (isBlank(ddnId) || safeAmount(amount).compareTo(BigDecimal.ZERO) == 0) {
+    private void validateAndTrackFundRequestPayment(String fundRequestId, BigDecimal amount, String folio) {
+        if (isBlank(fundRequestId) || safeAmount(amount).compareTo(BigDecimal.ZERO) == 0) {
             return;
         }
 
-        DdnDataService.DdnDefinition ddn = findDdnDefinition(ddnId)
-                .orElseThrow(() -> new CoreException(HttpStatus.NOT_FOUND.value(), "DDN not found: " + ddnId));
+        FundRequestDataService.FundRequestDefinition fundRequest = findFundRequestDefinition(fundRequestId)
+                .orElseThrow(() -> new CoreException(HttpStatus.BAD_REQUEST.value(), "Fund Request not found: " + fundRequestId));
 
-        BigDecimal existingPaid = getTotalPaidForDdn(ddnId);
+        BigDecimal existingPaid = getTotalPaidForFundRequest(fundRequestId);
         BigDecimal newTotalPaid = existingPaid.add(amount);
-        if (newTotalPaid.compareTo(ddn.totalPayableAmount()) > 0) {
+        if (newTotalPaid.compareTo(fundRequest.totalPayableAmount()) > 0) {
             throw new CoreException(HttpStatus.BAD_REQUEST.value(),
-                    String.format("Mapped amount exceeds DDN payable. DDN %s - Total payable: %.2f, Already paid: %.2f, New payment: %.2f",
-                            ddnId, ddn.totalPayableAmount(), existingPaid, amount));
+                    String.format("Mapped amount exceeds Fund Request payable. Fund Request %s - Total payable: %.2f, Already paid: %.2f, New payment: %.2f",
+                            fundRequestId, fundRequest.totalPayableAmount(), existingPaid, amount));
         }
     }
 
-    private BigDecimal getTotalPaidForDdn(String ddnId) {
-        BigDecimal total = ddnContributionMappingRepository.getTotalPaidForDdn(ddnId, STATUS_ACTIVE);
+    private BigDecimal getTotalPaidForFundRequest(String fundRequestId) {
+        BigDecimal total = fundRequestContributionMappingRepository.getTotalPaidForFundRequest(fundRequestId, STATUS_ACTIVE);
         return total != null ? total : BigDecimal.ZERO;
     }
 
@@ -512,27 +512,27 @@ public class DdnMappingServiceImpl implements DdnMappingService {
     }
 
     private void ensureInvestorCanMap(String folio) {
-        if (!ddnDataService.hasDdnDataForInvestor(folio)) {
+        if (!fundRequestDataService.hasFundRequestDataForInvestor(folio)) {
             throw new CoreException(HttpStatus.BAD_REQUEST.value(),
-                    "Investor has no DDN data. Add DDN records for folio: " + folio);
+                    "Investor has no Fund Request data. Add Fund Request records for folio: " + folio);
         }
     }
 
-    private List<DdnOptionDto> getOpenDdnOptionsForInvestor(String folio) {
-        return ddnDataService.getOpenDdnOptions(folio, this::getTotalPaidForDdn);
+    private List<FundRequestOptionDto> getOpenFundRequestOptionsForInvestor(String folio) {
+        return fundRequestDataService.getOpenFundRequestOptions(folio, this::getTotalPaidForFundRequest);
     }
 
-    private Optional<DdnDataService.DdnDefinition> findDdnDefinition(String ddnId) {
-        return ddnDataService.findDdn(ddnId);
+    private Optional<FundRequestDataService.FundRequestDefinition> findFundRequestDefinition(String fundRequestId) {
+        return fundRequestDataService.findFundRequest(fundRequestId);
     }
 
-    private String getCurrentDdnStatus(String ddnId) {
-        return ddnDataService.currentStatus(ddnId, this::getTotalPaidForDdn);
+    private String getCurrentFundRequestStatus(String fundRequestId) {
+        return fundRequestDataService.currentStatus(fundRequestId, this::getTotalPaidForFundRequest);
     }
 
-    private DdnOptionDto enrichDdnOption(DdnOptionDto option, VirtualAccountTransaction transaction) {
-        return DdnOptionDto.builder()
-                .ddnId(option.getDdnId())
+    private FundRequestOptionDto enrichFundRequestOption(FundRequestOptionDto option, VirtualAccountTransaction transaction) {
+        return FundRequestOptionDto.builder()
+                .fundRequestId(option.getFundRequestId())
                 .calculationId(option.getCalculationId())
                 .compositeId(option.getCompositeId())
                 .folio(option.getFolio())
@@ -566,7 +566,7 @@ public class DdnMappingServiceImpl implements DdnMappingService {
     private void validateHeaders(MultipartFile file) {
         String[] expectedHeaders = {
                 HEADER_UTR, HEADER_IFSC, HEADER_TRANSACTION_AMOUNT, HEADER_INITIAL_AMOUNT,
-                HEADER_INITIAL_COMMITMENT_DDN_ID, HEADER_TOPUP_AMOUNT, HEADER_TOPUP_DDN_ID, HEADER_EXCESS_AMOUNT
+                HEADER_INITIAL_COMMITMENT_FUND_REQUEST_ID, HEADER_TOPUP_AMOUNT, HEADER_TOPUP_FUND_REQUEST_ID, HEADER_EXCESS_AMOUNT
         };
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
@@ -586,29 +586,29 @@ public class DdnMappingServiceImpl implements DdnMappingService {
         }
     }
 
-    private BulkDdnMappingUploadRow parseRow(Row row, int rowNumber) {
-        return BulkDdnMappingUploadRow.builder()
+    private BulkFundRequestMappingUploadRow parseRow(Row row, int rowNumber) {
+        return BulkFundRequestMappingUploadRow.builder()
                 .rowNumber(rowNumber)
                 .utr(getCellValueAsString(row.getCell(0)))
                 .ifscCode(getCellValueAsString(row.getCell(1)))
                 .transactionAmount(getCellValueAsBigDecimal(row.getCell(2)))
                 .initialAmount(getCellValueAsBigDecimal(row.getCell(3)))
-                .initialCommitmentDdnId(getCellValueAsString(row.getCell(4)))
+                .initialCommitmentFundRequestId(getCellValueAsString(row.getCell(4)))
                 .topupAmount(getCellValueAsBigDecimal(row.getCell(5)))
-                .topupDdnId(getCellValueAsString(row.getCell(6)))
+                .topupFundRequestId(getCellValueAsString(row.getCell(6)))
                 .excessAmount(getCellValueAsBigDecimal(row.getCell(7)))
                 .build();
     }
 
-    private DdnMappingManualRequest convertToManualRequest(BulkDdnMappingUploadRow uploadRow) {
-        return DdnMappingManualRequest.builder()
+    private FundRequestMappingManualRequest convertToManualRequest(BulkFundRequestMappingUploadRow uploadRow) {
+        return FundRequestMappingManualRequest.builder()
                 .utr(uploadRow.getUtr())
                 .ifscCode(uploadRow.getIfscCode())
                 .transactionAmount(uploadRow.getTransactionAmount())
                 .initialAmount(uploadRow.getInitialAmount())
-                .initialCommitmentDdnId(uploadRow.getInitialCommitmentDdnId())
+                .initialCommitmentFundRequestId(uploadRow.getInitialCommitmentFundRequestId())
                 .topupAmount(uploadRow.getTopupAmount())
-                .topupDdnId(uploadRow.getTopupDdnId())
+                .topupFundRequestId(uploadRow.getTopupFundRequestId())
                 .excessAmount(uploadRow.getExcessAmount())
                 .build();
     }
@@ -642,7 +642,7 @@ public class DdnMappingServiceImpl implements DdnMappingService {
         }
     }
 
-    private Pageable createPageable(DdnMappingFilterRequest filterRequest) {
+    private Pageable createPageable(FundRequestMappingFilterRequest filterRequest) {
         int page = filterRequest.getPage() != null ? filterRequest.getPage() : 0;
         int size = filterRequest.getSize() != null ? filterRequest.getSize() : 20;
         String sortBy = filterRequest.getSortBy() != null ? filterRequest.getSortBy() : "mappedAt";
@@ -652,8 +652,8 @@ public class DdnMappingServiceImpl implements DdnMappingService {
         return PageRequest.of(page, size, Sort.by(direction, sortBy));
     }
 
-    private DdnMappingResponse convertToResponse(DdnContributionMapping mapping) {
-        return DdnMappingResponse.builder()
+    private FundRequestMappingResponse convertToResponse(FundRequestContributionMapping mapping) {
+        return FundRequestMappingResponse.builder()
                 .id(mapping.getId())
                 .utr(mapping.getUtr())
                 .masterVa(mapping.getMasterVa())
@@ -667,9 +667,9 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 .remarks(mapping.getRemarks())
                 .initialAmount(mapping.getInitialAmount())
                 .ifscCode(mapping.getIfscCode())
-                .initialCommitmentDdnId(mapping.getInitialCommitmentDdnId())
+                .initialCommitmentFundRequestId(mapping.getInitialCommitmentFundRequestId())
                 .topupAmount(mapping.getTopupAmount())
-                .topupDdnId(mapping.getTopupDdnId())
+                .topupFundRequestId(mapping.getTopupFundRequestId())
                 .excessAmount(mapping.getExcessAmount())
                 .mappingSource(mapping.getMappingSource())
                 .mappingType(mapping.getMappingType())
@@ -679,8 +679,8 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 .build();
     }
 
-    private DdnMappingHistoryDto convertToHistoryDto(DdnContributionMapping mapping) {
-        return DdnMappingHistoryDto.builder()
+    private FundRequestMappingHistoryDto convertToHistoryDto(FundRequestContributionMapping mapping) {
+        return FundRequestMappingHistoryDto.builder()
                 .id(mapping.getId())
                 .utr(mapping.getUtr())
                 .masterVa(mapping.getMasterVa())
@@ -692,9 +692,9 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 .fundName(mapping.getFundName())
                 .transactionDateTime(mapping.getTransactionDateTime())
                 .initialAmount(mapping.getInitialAmount())
-                .initialCommitmentDdnId(mapping.getInitialCommitmentDdnId())
+                .initialCommitmentFundRequestId(mapping.getInitialCommitmentFundRequestId())
                 .topupAmount(mapping.getTopupAmount())
-                .topupDdnId(mapping.getTopupDdnId())
+                .topupFundRequestId(mapping.getTopupFundRequestId())
                 .excessAmount(mapping.getExcessAmount())
                 .mappingSource(mapping.getMappingSource())
                 .mappingType(mapping.getMappingType())
@@ -703,17 +703,17 @@ public class DdnMappingServiceImpl implements DdnMappingService {
                 .build();
     }
 
-    private String resolveMappingStatus(DdnContributionMapping mapping) {
-        String ddnId = mapping.getInitialCommitmentDdnId() != null
-                ? mapping.getInitialCommitmentDdnId()
-                : mapping.getTopupDdnId();
-        if (ddnId == null) {
+    private String resolveMappingStatus(FundRequestContributionMapping mapping) {
+        String fundRequestId = mapping.getInitialCommitmentFundRequestId() != null
+                ? mapping.getInitialCommitmentFundRequestId()
+                : mapping.getTopupFundRequestId();
+        if (fundRequestId == null) {
             return mapping.getStatus();
         }
-        return getCurrentDdnStatus(ddnId);
+        return getCurrentFundRequestStatus(fundRequestId);
     }
 
-    private void writeHistoryRow(Row row, DdnContributionMapping mapping) {
+    private void writeHistoryRow(Row row, FundRequestContributionMapping mapping) {
         int col = 0;
         row.createCell(col++).setCellValue(nullToEmpty(mapping.getUtr()));
         row.createCell(col++).setCellValue(nullToEmpty(mapping.getMasterVa()));
@@ -725,24 +725,24 @@ public class DdnMappingServiceImpl implements DdnMappingService {
         row.createCell(col++).setCellValue(nullToEmpty(mapping.getFundName()));
         row.createCell(col++).setCellValue(mapping.getTransactionDateTime() != null ? mapping.getTransactionDateTime().toString() : "");
         row.createCell(col++).setCellValue(mapping.getInitialAmount() != null ? mapping.getInitialAmount().doubleValue() : 0.0);
-        row.createCell(col++).setCellValue(nullToEmpty(mapping.getInitialCommitmentDdnId()));
+        row.createCell(col++).setCellValue(nullToEmpty(mapping.getInitialCommitmentFundRequestId()));
         row.createCell(col++).setCellValue(mapping.getTopupAmount() != null ? mapping.getTopupAmount().doubleValue() : 0.0);
-        row.createCell(col++).setCellValue(nullToEmpty(mapping.getTopupDdnId()));
+        row.createCell(col++).setCellValue(nullToEmpty(mapping.getTopupFundRequestId()));
         row.createCell(col++).setCellValue(mapping.getExcessAmount() != null ? mapping.getExcessAmount().doubleValue() : 0.0);
         row.createCell(col++).setCellValue(nullToEmpty(mapping.getMappingSource()));
         row.createCell(col++).setCellValue(nullToEmpty(mapping.getMappingType()));
         row.createCell(col).setCellValue(mapping.getMappedAt() != null ? mapping.getMappedAt().toString() : "");
     }
 
-    private AutoTagResultDto createSuccessResult(String utr, String folio, String ddnId, BigDecimal amount) {
+    private AutoTagResultDto createSuccessResult(String utr, String folio, String fundRequestId, BigDecimal amount) {
         return AutoTagResultDto.builder()
                 .utr(utr)
                 .folio(folio)
-                .ddnId(ddnId)
+                .fundRequestId(fundRequestId)
                 .amount(amount)
                 .status(STATUS_SUCCESS)
-                .message(STATUS_CLOSED.equals(getCurrentDdnStatus(ddnId))
-                        ? "Successfully tagged and DDN closed"
+                .message(STATUS_CLOSED.equals(getCurrentFundRequestStatus(fundRequestId))
+                        ? "Successfully tagged and Fund Request closed"
                         : "Successfully tagged")
                 .build();
     }
@@ -776,4 +776,3 @@ public class DdnMappingServiceImpl implements DdnMappingService {
         return value == null ? "" : value;
     }
 }
-
