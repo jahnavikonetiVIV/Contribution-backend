@@ -280,6 +280,15 @@ public class FundRequestMappingServiceImpl implements FundRequestMappingService 
                         HttpStatus.BAD_REQUEST.value(),
                         String.format("Transaction not found for UTR: %s and IFSC: %s", request.getUtr(), request.getIfscCode())));
 
+        String ifscPrefix = (request.getIfscCode() != null && request.getIfscCode().length() >= 4)
+                ? request.getIfscCode().substring(0, 4)
+                : (request.getIfscCode() != null ? request.getIfscCode() : "");
+        if (!ifscPrefix.isEmpty() && fundRequestContributionMappingRepository.existsByUtrAndIfscPrefixAndStatus(
+                request.getUtr(), ifscPrefix, STATUS_ACTIVE)) {
+            throw new CoreException(HttpStatus.BAD_REQUEST.value(),
+                    "UTR " + request.getUtr() + " with IFSC prefix " + ifscPrefix + " is already mapped.");
+        }
+
         if (transaction.getClassification() == Classification.IMPROPER) {
             throw new CoreException(HttpStatus.BAD_REQUEST.value(),
                     "Improper transactions cannot be used for Fund Request mapping. Please classify the transaction as Proper first.");

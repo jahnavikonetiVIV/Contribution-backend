@@ -41,6 +41,10 @@ public interface FundRequestContributionMappingRepository extends JpaRepository<
 
     Optional<FundRequestContributionMapping> findByUtrAndIfscCodeAndStatus(String utr, String ifscCode, String status);
 
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM FundRequestContributionMapping m " +
+           "WHERE m.utr = :utr AND SUBSTRING(m.ifscCode, 1, 4) = :ifscPrefix AND m.status = :status")
+    boolean existsByUtrAndIfscPrefixAndStatus(@Param("utr") String utr, @Param("ifscPrefix") String ifscPrefix, @Param("status") String status);
+
     @Query("SELECT COALESCE(SUM(" +
            "  CASE WHEN m.initialCommitmentFundRequestId = :fundRequestId THEN COALESCE(m.initialAmount, 0) ELSE 0 END + " +
            "  CASE WHEN m.topupFundRequestId = :fundRequestId THEN COALESCE(m.topupAmount, 0) ELSE 0 END" +
